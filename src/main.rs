@@ -7,8 +7,10 @@ fn main() {
     if let Ok(lines) = read_lines("settings.gradle") {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
-            if let Ok(ip) = line {
-                println!("{}", ip);
+            if let Ok(val) = line {
+                if val.contains("instrumentation") {
+                    println!("{}", val);
+                }
             }
         }
     }
