@@ -20,19 +20,18 @@ fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
     Ok(io::BufReader::new(file).lines())
 }
 
-fn extract_package(val: &str) -> &str {
+fn extract_package(val: &str) -> Option<&str> {
     if val.contains("instrumentation") {
         let i = val.find(':');
         if i.is_some() {
             let j = i.unwrap();
-            //println!("{}", val.to_string().substring(j + 1, val.len() - 1));
             let start = j + 1;
             let end = val.len() - 1;
             let pkg = val.substring(start, end);
-            return pkg
+            return Some(pkg)
         }
     }
-    ""
+    None
 }
 
 #[cfg(test)]
@@ -42,12 +41,12 @@ mod tests {
     #[test]
     fn blank_is_blank() {
         let actual = extract_package("");
-        assert_eq!(actual, "");
+        assert_eq!(actual, None);
     }
 
     #[test]
     fn it_works() {
-        //let actual = extract_package(&"include 'instrumentation:akka-2.2'");
-        //assert_eq!(actual, Some("akka-2.2"));
+        let actual = extract_package("include 'instrumentation:akka-2.2'");
+        assert_eq!(actual, Some("akka-2.2"));
     }
 }
