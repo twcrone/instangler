@@ -14,6 +14,7 @@ fn main() {
                 }
             }
         }
+        pkgs.sort();
         for x in pkgs {
             println!("{}", x);
         }
