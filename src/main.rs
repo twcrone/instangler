@@ -15,8 +15,14 @@ fn main() {
             }
         }
         pkgs.sort();
-        for x in pkgs {
-            println!("{}", x);
+        println!("{}", "// Loaded instrumentation modules");
+        for a in &pkgs {
+            println!("Supportability/WeaveInstrumentation/Loaded/com.newrelic.instrumentation.{}/1", a);
+        }
+        println!();
+        println!("{}", "// Skipped instrumentation modules");
+        for b in &pkgs {
+            println!("Supportability/WeaveInstrumentation/Skipped/com.newrelic.instrumentation.{}/1", b);
         }
     }
 }
