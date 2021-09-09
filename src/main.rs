@@ -8,7 +8,10 @@ fn main() {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(val) = line {
-                println!("{}", val)
+                let pkg = extract_package(&val);
+                if pkg.is_some() {
+                    println!("{}", pkg.unwrap())
+                }
             }
         }
     }
