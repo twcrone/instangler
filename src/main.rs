@@ -5,14 +5,17 @@ use substring::Substring;
 
 fn main() {
     if let Ok(lines) = read_lines("settings.gradle") {
-        // Consumes the iterator, returns an (Optional) String
+        let mut pkgs = Vec::new();
         for line in lines {
             if let Ok(val) = line {
                 let pkg = extract_package(&val);
                 if pkg.is_some() {
-                    println!("{}", pkg.unwrap())
+                    pkgs.push(pkg.unwrap().to_string());
                 }
             }
+        }
+        for x in pkgs {
+            println!("{}", x);
         }
     }
 }
