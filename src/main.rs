@@ -1,15 +1,19 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use substring::Substring;
 
 fn main() {
-    // File hosts must exist in current path before this produces output
     if let Ok(lines) = read_lines("settings.gradle") {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(val) = line {
                 if val.contains("instrumentation") {
-                    println!("{}", val);
+                    let i = val.find(':');
+                    if i.is_some() {
+                        let j = i.unwrap();
+                        println!("{}", val.to_string().substring(j + 1, val.len() - 1));
+                    }
                 }
             }
         }
