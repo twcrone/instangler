@@ -134,6 +134,13 @@ mod tests {
         assert_eq!(cmp_pkgs(first, last), Less);
     }
 
+    // #[test]
+    // fn another_edge_package_compare() {
+    //     let first = "com.newrelic.instrumentation.jdbc-postgresql-8.0-312.jdbc3";
+    //     let last = "com.newrelic.instrumentation.jdbc-postgresql-9.4.1208";
+    //     assert_eq!(cmp_pkgs(first, last), Less);
+    // }
+
     #[test]
     fn package_compare() {
         let old = "com.newrelic.instrumentation.scala-2.9.3";
