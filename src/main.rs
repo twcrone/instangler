@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 use substring::Substring;
+use std::cmp::Ordering;
 
 fn main() {
     if let Ok(lines) = read_lines("settings.gradle") {
@@ -14,7 +15,7 @@ fn main() {
                 }
             }
         }
-        pkgs.sort();
+        pkgs.sort_by(|a, b| cmp_as_num_if_possible(a, b));
         println!("{}", "// Loaded instrumentation modules");
         for a in &pkgs {
             println!("Supportability/WeaveInstrumentation/Loaded/com.newrelic.instrumentation.{}/1", a);
@@ -45,6 +46,10 @@ fn extract_package(val: &str) -> Option<&str> {
         }
     }
     None
+}
+
+fn cmp_as_num_if_possible(a: &str, b: &str) -> Ordering {
+    a.cmp(b)
 }
 
 #[cfg(test)]
