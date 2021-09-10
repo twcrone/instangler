@@ -3,6 +3,7 @@ use std::io::{self, BufRead};
 use std::path::Path;
 use substring::Substring;
 use std::cmp::Ordering;
+use std::cmp::Ordering::{Equal};
 
 fn main() {
     if let Ok(lines) = read_lines("settings.gradle") {
@@ -15,7 +16,7 @@ fn main() {
                 }
             }
         }
-        pkgs.sort_by(|a, b| cmp_as_num_if_possible(a, b));
+        pkgs.sort_by(|a, b| cmp_pkgs(a, b));
         println!("{}", "// Loaded instrumentation modules");
         for a in &pkgs {
             println!("Supportability/WeaveInstrumentation/Loaded/com.newrelic.instrumentation.{}/1", a);
@@ -54,16 +55,93 @@ fn cmp_as_num_if_possible(a: &str, b: &str) -> Ordering {
     if i.is_ok() && j.is_ok() {
         let ai = i.unwrap();
         let bi = j.unwrap();
+        //println!("{} {}", ai, bi);
         ai.cmp(&bi)
     } else {
         a.cmp(b)
     }
 }
 
+fn package_wo_version(s: &str) -> &str {
+    let rfind = s.rfind("-");
+    if rfind.is_some() {
+        s.substring(0, rfind.unwrap())
+    }
+    else {
+        s
+    }
+}
+
+fn cmp_pkgs(a: &str, b: &str) -> Ordering {
+    if a == b {
+        return Equal
+    }
+    else {
+        let asub = package_wo_version(a);
+        let bsub = package_wo_version(b);
+        //println!("*{} {}", asub, bsub);
+        let first_order = asub.cmp(bsub);
+        if first_order != Equal {
+            first_order
+        }
+        else {
+            let ari = a.rfind("-");
+            if ari.is_none() {
+                return cmp_as_num_if_possible(a, b);
+            }
+            let start = ari.unwrap();
+            let asub = a.substring(start + 1, a.len());
+            let bsub = b.substring(start + 1, b.len());
+            // println!("{} {}", asub, bsub);
+            let mut a_split = asub.split(".");
+            let mut b_split = bsub.split(".");
+            let mut ai = a_split.nth(0);
+            let mut bi = b_split.nth(0);
+            let mut order: Ordering;
+            loop {
+                // println!("In loop i= {}", i);
+                if ai.is_none() || bi.is_none() {
+                    return Equal
+                }
+                // println!("Not Equal");
+                order = cmp_as_num_if_possible(ai.unwrap(), bi.unwrap());
+                if !order.is_eq() {
+                    return order
+                }
+                ai = a_split.nth(0);
+                bi = b_split.nth(0);
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{extract_package, cmp_as_num_if_possible};
+    use crate::{extract_package, cmp_as_num_if_possible, cmp_pkgs};
     use std::cmp::Ordering::{Less, Greater, Equal};
+
+    #[test]
+    fn base_package_compare() {
+        let first = "com.newrelic.instrumentation.scala-2.9.3";
+        let last = "com.newrelic.instrumentation.zio";
+        assert_eq!(cmp_pkgs(first, last), Less);
+    }
+
+    #[test]
+    fn edge_package_compare() {
+        let first = "com.newrelic.instrumentation.play-shaded-async-http-client-1.0.0";
+        let last = "com.newrelic.instrumentation.play-ws-2.6.0";
+        assert_eq!(cmp_pkgs(first, last), Less);
+    }
+
+    #[test]
+    fn package_compare() {
+        let old = "com.newrelic.instrumentation.scala-2.9.3";
+        let new = "com.newrelic.instrumentation.scala-2.13.0";
+        assert_eq!(cmp_pkgs(new, new), Equal);
+        assert_eq!(cmp_pkgs(old, new), Less);
+        assert_eq!(cmp_pkgs(new, old), Greater);
+    }
 
     #[test]
     fn blank_is_blank() {
@@ -90,7 +168,5 @@ mod tests {
         assert_eq!(cmp_as_num_if_possible("2", "1"), Greater);
         assert_eq!(cmp_as_num_if_possible("1", "1"), Equal);
         assert_eq!(cmp_as_num_if_possible("30", "4"), Greater);
-        //assert_eq!(cmp_as_num_if_possible("1", "2"), Greater);
-        //assert_eq!(cmp_as_num_if_possible("java", "java"), Equal);
     }
 }
