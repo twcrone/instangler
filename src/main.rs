@@ -49,7 +49,15 @@ fn extract_package(val: &str) -> Option<&str> {
 }
 
 fn cmp_as_num_if_possible(a: &str, b: &str) -> Ordering {
-    a.cmp(b)
+    let i = a.parse::<i32>();
+    let j = b.parse::<i32>();
+    if i.is_ok() && j.is_ok() {
+        let ai = i.unwrap();
+        let bi = j.unwrap();
+        ai.cmp(&bi)
+    } else {
+        a.cmp(b)
+    }
 }
 
 #[cfg(test)]
@@ -74,5 +82,15 @@ mod tests {
         assert_eq!(cmp_as_num_if_possible("java", "javax"), Less);
         assert_eq!(cmp_as_num_if_possible("javax", "java"), Greater);
         assert_eq!(cmp_as_num_if_possible("java", "java"), Equal);
+    }
+
+    #[test]
+    fn compare_as_ints() {
+        assert_eq!(cmp_as_num_if_possible("1", "2"), Less);
+        assert_eq!(cmp_as_num_if_possible("2", "1"), Greater);
+        assert_eq!(cmp_as_num_if_possible("1", "1"), Equal);
+        assert_eq!(cmp_as_num_if_possible("30", "4"), Greater);
+        //assert_eq!(cmp_as_num_if_possible("1", "2"), Greater);
+        //assert_eq!(cmp_as_num_if_possible("java", "java"), Equal);
     }
 }
