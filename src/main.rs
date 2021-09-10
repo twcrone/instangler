@@ -49,8 +49,8 @@ fn extract_package(val: &str) -> Option<&str> {
 }
 
 fn cmp_as_num_if_possible(a: &str, b: &str) -> Ordering {
-    let i = a.parse::<i32>();
-    let j = b.parse::<i32>();
+    let i = a.parse::<u8>();
+    let j = b.parse::<u8>();
     if i.is_ok() && j.is_ok() {
         let ai = i.unwrap();
         let bi = j.unwrap();
