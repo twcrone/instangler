@@ -54,7 +54,8 @@ fn cmp_as_num_if_possible(a: &str, b: &str) -> Ordering {
 
 #[cfg(test)]
 mod tests {
-    use crate::extract_package;
+    use crate::{extract_package, cmp_as_num_if_possible};
+    use std::cmp::Ordering::{Less, Greater, Equal};
 
     #[test]
     fn blank_is_blank() {
@@ -66,5 +67,12 @@ mod tests {
     fn it_works() {
         let actual = extract_package("include 'instrumentation:akka-2.2'");
         assert_eq!(actual, Some("akka-2.2"));
+    }
+
+    #[test]
+    fn compare_as_strings() {
+        assert_eq!(cmp_as_num_if_possible("java", "javax"), Less);
+        assert_eq!(cmp_as_num_if_possible("javax", "java"), Greater);
+        assert_eq!(cmp_as_num_if_possible("java", "java"), Equal);
     }
 }
